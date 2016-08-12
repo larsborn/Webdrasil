@@ -1,0 +1,24 @@
+.App {
+
+}
+
+.App-logo {
+    height: 80px;
+    display: inline-block;
+}
+
+.App-header {
+    background-color: #ccc;
+    height: 80px;
+    padding: 20px;
+    color: white;
+}
+
+.App-header h2 {
+    display: inline-block;
+    color: #000;
+}
+
+.App-intro {
+    font-size: large;
+}
