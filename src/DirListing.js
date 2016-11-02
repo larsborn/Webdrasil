@@ -34,10 +34,13 @@ export default class extends React.Component {
     }
 
     renderRowContent(row) {
-        return <li key={row.filename}><a onClick={(event) => {
-            this.loadDirectoryContent(this.state.path + '/' + row.filename);
-            event.preventDefault();
-        }} href="#">{row.filename}</a></li>;
+        let content = row.filename;
+        if (row.is_dir && !row.is_empty)
+            content = <a onClick={(event) => {
+                this.loadDirectoryContent(this.state.path + '/' + row.filename);
+                event.preventDefault();
+            }} href="#">{content}</a>;
+        return <li key={row.filename}>{content}</li>;
     }
 
     renderListing() {

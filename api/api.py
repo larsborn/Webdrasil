@@ -39,19 +39,22 @@ def list_dir():
         if part not in os.listdir(os.path.sep + os.path.join(*current_folder)):
             raise InvalidUsage('Folder does not exist', 404)
         current_folder.append(part)
-        if not os.path.isdir(os.path.sep + os.path.sep.join(current_folder)):
+        if not os.path.isdir(os.path.sep + os.path.join(*current_folder)):
             raise InvalidUsage('Folder does not exist', 404)
 
-    resp = Response(json.dumps(
-        [{
-             'filename': filename,
-             'is_dir': os.path.isdir(filename),
-             'is_symlink': os.path.islink(filename)
-         }
-         for filename in os.listdir(os.path.sep + os.path.join(*current_folder))
-         if not filename.startswith('.')
-         ]
-    ))
+    ret = []
+    base_folder = os.path.sep + os.path.join(*current_folder)
+    for filename in os.listdir(base_folder):
+        if filename.startswith('.'): continue
+
+        full_filename = os.path.join(base_folder, filename)
+        ret.append({
+            'filename': filename,
+            'is_dir': os.path.isdir(full_filename),
+            'is_empty': os.path.isdir(full_filename) and len(os.listdir(full_filename)) == 0,
+            'is_symlink': os.path.islink(full_filename)
+        })
+    resp = Response(json.dumps(ret))
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
