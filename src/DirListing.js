@@ -35,11 +35,21 @@ export default class extends React.Component {
 
     renderRowContent(row) {
         let content = row.filename;
-        if (row.is_dir && !row.is_empty)
-            content = <a onClick={(event) => {
-                this.loadDirectoryContent(this.state.path + '/' + row.filename);
-                event.preventDefault();
-            }} href="#">{content}</a>;
+        if (row.is_dir) {
+            if (!row.is_empty) {
+                content = <a onClick={(event) => {
+                    this.loadDirectoryContent(this.state.path + '/' + row.filename);
+                    event.preventDefault();
+                }} href="#">{content}</a>;
+            }
+        }
+        else if (row.file_status == 'IN_PROGRESS') {
+            content = <div>{content} <i>processing...</i></div>;
+        }
+        else if (row.file_status == 'MISSING') {
+            content = <div>{content} <a href="#">download</a></div>;
+        }
+
         return <li key={row.filename}>{content}</li>;
     }
 
