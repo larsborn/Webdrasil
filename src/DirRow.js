@@ -6,32 +6,35 @@ export default class extends React.Component {
         super(props);
         this.clickDirectory = props.clickDirectory;
         this.clickDownload = props.clickDownload;
-        this.filename = props.filename;
-        this.isDir = props.isDir;
-        this.isEmpty = props.isEmpty;
-        this.fileStatus = props.fileStatus;
+        this.state = {
+            filename: props.filename,
+            isDir: props.isDir,
+            isEmpty: props.isEmpty,
+            fileStatus: props.fileStatus,
+        };
     }
 
     render() {
-        let content = this.filename;
-        if (this.isDir) {
-            if (!this.isEmpty) {
+        let content = this.state.filename;
+        if (this.state.isDir) {
+            if (!this.state.isEmpty) {
                 content = <a onClick={(event) => {
-                    this.clickDirectory(this.filename);
+                    this.clickDirectory(this.state.filename);
                     event.preventDefault();
                 }} href="#">{content}</a>;
             }
         }
-        else if (this.fileStatus === 'IN_PROGRESS') {
+        else if (this.state.fileStatus === 'IN_PROGRESS') {
             content = <div>{content} <i>processing...</i></div>;
         }
-        else if (this.fileStatus === 'MISSING') {
+        else if (this.state.fileStatus === 'MISSING') {
             content = <div>{content} <a onClick={(event) => {
-                this.clickDownload(this.filename);
+                this.setState({fileStatus: 'IN_PROGRESS'});
+                this.clickDownload(this.state.filename);
                 event.preventDefault();
             }} href="#">download</a></div>;
         }
 
-        return <li key={this.filename}>{content}</li>;
+        return <li key={this.state.filename}>{content}</li>;
     }
 }
