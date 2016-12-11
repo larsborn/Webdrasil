@@ -1,7 +1,8 @@
 import React from 'react';
+import path from 'path';
 import loading from './image/ajax-loader.gif'
-import WebdrasilApi from 'WebdrasilApi';
-import {FaFolderO, FaFolder} from 'react-icons/lib/fa';
+import WebdrasilApi from './WebdrasilApi';
+import DirRow from './DirRow';
 
 export default class extends React.Component {
     constructor(props) {
@@ -9,11 +10,17 @@ export default class extends React.Component {
         this.state = {content: null, path: ''}
     }
 
-    loadDirectoryContent(path) {
-        this.setState({content: null, path: path});
-        new WebdrasilApi().list(path, (response) => {
+    loadDirectoryContent(filename) {
+        let nextPath = filename == '..' ? path.dirname(this.state.path) : path.join(this.state.path, filename);
+        if (nextPath === '.') nextPath = '/';
+        this.setState({content: null, path: nextPath});
+        new WebdrasilApi().list(nextPath, (response) => {
             this.setState({content: response.data})
         });
+    }
+
+    clickDownload(filename) {
+        new WebdrasilApi().download(path.join(this.state.path, filename));
     }
 
     componentWillMount() {
@@ -26,34 +33,9 @@ export default class extends React.Component {
     renderDirectoryUp() {
         if (this.state.path === '') return '';
         return <li><a href="#" onClick={(event) => {
-            let components = this.state.path.split('/');
-            components.pop();
-            this.loadDirectoryContent(components.join('/'));
+            this.loadDirectoryContent('..');
             event.preventDefault();
         }}>..</a></li>
-    }
-
-    renderRowContent(row) {
-        let content = row.filename;
-        if (row.is_dir) {
-            if (!row.is_empty) {
-                content = <a onClick={(event) => {
-                    this.loadDirectoryContent(this.state.path + '/' + row.filename);
-                    event.preventDefault();
-                }} href="#">{content}</a>;
-            }
-        }
-        else if (row.file_status == 'IN_PROGRESS') {
-            content = <div>{content} <i>processing...</i></div>;
-        }
-        else if (row.file_status == 'MISSING') {
-            content = <div>{content} <a onClick={(event) => {
-                new WebdrasilApi().download(this.state.path + '/' + row.filename);
-                event.preventDefault();
-            }} href="#">download</a></div>;
-        }
-
-        return <li key={row.filename}>{content}</li>;
     }
 
     renderListing() {
@@ -62,7 +44,15 @@ export default class extends React.Component {
         return <ul>
             { this.renderDirectoryUp()}
             {this.state.content.map((row) => {
-                return this.renderRowContent(row);
+                return <DirRow
+                    key={row.filename}
+                    filename={row.filename}
+                    is_dir={row.is_dir}
+                    is_empty={row.is_empty}
+                    file_status={row.file_status}
+                    clickDirectory={this.loadDirectoryContent.bind(this)}
+                    clickDownload={this.clickDownload.bind(this)}
+                />
             })}
         </ul>
     }
