@@ -11,7 +11,7 @@ export default class extends React.Component {
     }
 
     loadDirectoryContent(filename) {
-        let nextPath = filename == '..' ? path.dirname(this.state.path) : path.join(this.state.path, filename);
+        let nextPath = filename === '..' ? path.dirname(this.state.path) : path.join(this.state.path, filename);
         if (nextPath === '.') nextPath = '/';
         this.setState({content: null, path: nextPath});
         new WebdrasilApi().list(nextPath, (response) => {
@@ -31,7 +31,7 @@ export default class extends React.Component {
     }
 
     renderDirectoryUp() {
-        if (this.state.path === '') return '';
+        if (this.state.path === '/') return '';
         return <li><a href="#" onClick={(event) => {
             this.loadDirectoryContent('..');
             event.preventDefault();
@@ -47,9 +47,9 @@ export default class extends React.Component {
                 return <DirRow
                     key={row.filename}
                     filename={row.filename}
-                    is_dir={row.is_dir}
-                    is_empty={row.is_empty}
-                    file_status={row.file_status}
+                    isDir={row.is_dir}
+                    isEmpty={row.is_empty}
+                    fileStatus={row.file_status}
                     clickDirectory={this.loadDirectoryContent.bind(this)}
                     clickDownload={this.clickDownload.bind(this)}
                 />

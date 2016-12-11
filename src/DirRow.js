@@ -7,25 +7,25 @@ export default class extends React.Component {
         this.clickDirectory = props.clickDirectory;
         this.clickDownload = props.clickDownload;
         this.filename = props.filename;
-        this.is_dir = props.is_dir;
-        this.is_empty = props.is_empty;
-        this.file_status = props.file_status;
+        this.isDir = props.isDir;
+        this.isEmpty = props.isEmpty;
+        this.fileStatus = props.fileStatus;
     }
 
     render() {
         let content = this.filename;
-        if (this.is_dir) {
-            if (!this.is_empty) {
+        if (this.isDir) {
+            if (!this.isEmpty) {
                 content = <a onClick={(event) => {
                     this.clickDirectory(this.filename);
                     event.preventDefault();
                 }} href="#">{content}</a>;
             }
         }
-        else if (this.file_status === 'IN_PROGRESS') {
+        else if (this.fileStatus === 'IN_PROGRESS') {
             content = <div>{content} <i>processing...</i></div>;
         }
-        else if (this.file_status === 'MISSING') {
+        else if (this.fileStatus === 'MISSING') {
             content = <div>{content} <a onClick={(event) => {
                 this.clickDownload(this.filename);
                 event.preventDefault();
