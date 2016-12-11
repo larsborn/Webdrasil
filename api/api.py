@@ -45,7 +45,9 @@ def download():
     if not islink(file_to_download):
         raise InvalidUsage('File does not exist', 404)
 
-    Annex().add_tag(file_to_download, 'webdrasil')
+    fp = open('/home/annex/webdrasil_tag', 'wb')
+    fp.write(file_to_download)
+    fp.close()
     return jsonify({})
 
 
