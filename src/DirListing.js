@@ -1,6 +1,6 @@
 import React from 'react';
-import * as axios from 'axios';
 import loading from './image/ajax-loader.gif'
+import WebdrasilApi from 'WebdrasilApi';
 import {FaFolderO, FaFolder} from 'react-icons/lib/fa';
 
 export default class extends React.Component {
@@ -11,7 +11,7 @@ export default class extends React.Component {
 
     loadDirectoryContent(path) {
         this.setState({content: null, path: path});
-        axios.get('http://webdrasil.nullteilerfrei.de/api/list?dir=' + path).then((response) => {
+        new WebdrasilApi().list(path, (response) => {
             this.setState({content: response.data})
         });
     }
@@ -47,7 +47,10 @@ export default class extends React.Component {
             content = <div>{content} <i>processing...</i></div>;
         }
         else if (row.file_status == 'MISSING') {
-            content = <div>{content} <a href="#">download</a></div>;
+            content = <div>{content} <a onClick={(event) => {
+                new WebdrasilApi().download(this.state.path + '/' + row.filename);
+                event.preventDefault();
+            }} href="#">download</a></div>;
         }
 
         return <li key={row.filename}>{content}</li>;
