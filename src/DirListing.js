@@ -7,15 +7,19 @@ import DirRow from './DirRow';
 export default class extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {content: null, path: ''}
+        this.state = {dirListing: null, path: ''}
     }
 
     loadDirectoryContent(filename) {
         let nextPath = filename === '..' ? path.dirname(this.state.path) : path.join(this.state.path, filename);
         if (nextPath === '.') nextPath = '/';
-        this.setState({content: null, path: nextPath});
+        this.setState({dirListing: null, path: nextPath});
         new WebdrasilApi().list(nextPath, (response) => {
-            this.setState({content: response.data})
+            this.setState({
+                dirListing: response.data.sort((a, b) => {
+                    return a.filename.toLowerCase().localeCompare(b.filename.toLowerCase());
+                })
+            })
         });
     }
 
@@ -39,11 +43,11 @@ export default class extends React.Component {
     }
 
     renderListing() {
-        if (this.state.content === null) return <div><img src={loading} alt="loading"/></div>
+        if (this.state.dirListing === null) return <div><img src={loading} alt="loading"/></div>
 
         return <ul>
             { this.renderDirectoryUp()}
-            {this.state.content.map((row) => {
+            {this.state.dirListing.map((row) => {
                 return <DirRow
                     key={row.filename}
                     filename={row.filename}

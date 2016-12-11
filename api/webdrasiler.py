@@ -1,5 +1,4 @@
 from lib.annex import Annex
-from time import sleep
 from os.path import join, normpath, islink, isfile
 
 FIFO = '/home/annex/webdrasil_tag'
@@ -11,5 +10,4 @@ with open(FIFO) as fifo:
         if line:
             path = normpath(join(annex.yggdrasil_root, line))
             if path.startswith(annex.yggdrasil_root) and (islink(path) or isfile(path)):
-                annex.add_tag(path, 'webdrasil')
-        sleep(1)
+                annex.set_metadata(path, 'in_webdrasil', '1')

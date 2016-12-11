@@ -1,3 +1,4 @@
+import json
 import subprocess
 
 from lib.web import InvalidUsage
@@ -16,7 +17,7 @@ class Annex(object):
             'annex'
         ]
         commands += args
-        print ' '.join(commands)
+        print '[running] %s' % ' '.join(commands)
 
         p = subprocess.Popen(commands, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = p.communicate()
@@ -37,3 +38,27 @@ class Annex(object):
 
     def add_tag(self, filename, tag):
         self._run('metadata', '--tag', tag, filename)
+
+    def remove_tag(self, filename, tag):
+        self._run('metadata', '--untag', tag, filename)
+
+    def set_metadata(self, filename, field, value):
+        self._run('metadata', '-s', '%s=%s' % (field, value), filename)
+
+    def remove_metadata(self, filename, field, value):
+        self._run('metadata', '-s', '%s-=%s' % (field, value), filename)
+
+    def get_metadata(self, filename):
+        result = self._run('metadata', '--json', filename)
+        while ',,' in result:
+            result = result.replace(',,', ',')  # git annex returns invalid JSON where fields are missing
+        return json.loads(result)
+
+    def find(self, *criteria):
+        args = ['find']
+        args += criteria
+        args.append(self.yggdrasil_root)
+        return self._run(*args)
+
+    def drop(self, filename):
+        print 'git annex drop not implemented: %s' % filename

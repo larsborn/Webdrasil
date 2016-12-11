@@ -64,11 +64,11 @@ def list_dir():
         # determine file status
         file_status = None
         if islink(full_filename):
-            tags = annex.get_tags(full_filename)
+            metadata = annex.get_metadata(full_filename)
             if exists(full_filename):
                 file_status = 'EXISTS'
             else:
-                if 'webdrasil' in tags:
+                if 'in_webdrasil' in metadata and metadata['in_webdrasil']:
                     file_status = 'IN_PROGRESS'
                 else:
                     file_status = 'MISSING'
