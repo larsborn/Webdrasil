@@ -2,13 +2,31 @@ from os import listdir
 from os.path import isdir, join, sep as path_sep, exists, islink
 
 from flask import Flask, request, jsonify
-
-from lib.web import InvalidUsage
-
-from lib.annex import Annex
+from lib import WebdrasilDownloader
 
 app = Flask(__name__)
 app.config['YGGDRASIL_DIR'] = [u'home', u'annex', u'Yggdrasil']
+app.config['QUEUE_FILE'] = '/home/webdrasil/queue.json'
+
+
+def base_dir_len():
+    return len('/'.join(app.config['YGGDRASIL_DIR'])) + 2
+
+
+class InvalidUsage(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message  # TODO don't output error to client in non-debugging mode
+        return rv
 
 
 @app.errorhandler(InvalidUsage)
@@ -45,15 +63,15 @@ def download():
     if not islink(file_to_download):
         raise InvalidUsage('File does not exist', 404)
 
-    fp = open('/home/annex/webdrasil_tag', 'wb')
-    fp.write(file_to_download)
-    fp.close()
+    downloader = WebdrasilDownloader(app.config['QUEUE_FILE'])
+    downloader.schedule(file_to_download[base_dir_len():])
+
     return jsonify({})
 
 
 @app.route("/api/list", methods=['GET'])
 def list_dir():
-    annex = Annex()
+    downloader = WebdrasilDownloader(app.config['QUEUE_FILE'])
 
     base_folder = _sanitize_basedir(request.args.get('dir', ''))
     ret = []
@@ -64,25 +82,19 @@ def list_dir():
         # determine file status
         file_status = None
         if islink(full_filename):
-            metadata = annex.get_metadata(full_filename)
             if exists(full_filename):
                 file_status = 'EXISTS'
             else:
-                if 'in_webdrasil' in metadata and metadata['in_webdrasil']:
-                    file_status = 'IN_PROGRESS'
-                else:
-                    file_status = 'MISSING'
+                file_status = 'IN_PROGRESS' if downloader.is_scheduled(full_filename[base_dir_len():]) else 'MISSING'
 
         ret.append({
             'filename': filename,
-            'is_dir':
-                isdir(full_filename),
+            'is_dir': isdir(full_filename),
             'is_empty': isdir(full_filename) and len(listdir(full_filename)) == 0,
             'is_symlink': islink(full_filename),
             'file_status': file_status,
         })
     resp = jsonify(ret)
-    resp.headers['Access-Control-Allow-Origin'] = '*'  # comment in, for API debugging from client
     return resp
 
 
