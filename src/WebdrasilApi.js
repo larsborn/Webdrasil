@@ -1,14 +1,14 @@
 import * as axios from 'axios';
 
 function WebdrasilApi() {
-    var baseUrl = 'http://webdrasil.nullteilerfrei.de/api/';
+    let baseUrl = '/api/';
 
-    this.list = function (path, callback) {
-        axios.get(baseUrl + 'list?dir=' + path).then(callback);
+    this.list = function (path) {
+        return axios.get(baseUrl + 'list?dir=' + path);
     };
 
     this.download = function (path) {
-        axios.post(baseUrl + 'download?file=' + path);
+        return axios.post(baseUrl + 'download?file=' + path);
     };
 }
 

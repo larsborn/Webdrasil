@@ -14,7 +14,7 @@ export default class extends React.Component {
         let nextPath = filename === '..' ? path.dirname(this.state.path) : path.join(this.state.path, filename);
         if (nextPath === '.') nextPath = '/';
         this.setState({dirListing: null, path: nextPath});
-        new WebdrasilApi().list(nextPath, (response) => {
+        new WebdrasilApi().list(nextPath).then((response) => {
             this.setState({
                 dirListing: response.data.sort((a, b) => {
                     return a.filename.toLowerCase().localeCompare(b.filename.toLowerCase());
@@ -46,7 +46,7 @@ export default class extends React.Component {
         if (this.state.dirListing === null) return <div><img src={loading} alt="loading"/></div>
 
         return <ul>
-            { this.renderDirectoryUp()}
+            {this.renderDirectoryUp()}
             {this.state.dirListing.map((row) => {
                 return <DirRow
                     key={row.filename}
