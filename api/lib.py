@@ -79,4 +79,4 @@ class WebdrasilDownloader(object):
         return [row for row in queue if filter_callback(row)]
 
     def is_scheduled(self, file_name):
-        return True if self.get_filtered(lambda row: file_name == row['file_name']) else False
+        return True if self.get_filtered(lambda entry: file_name == entry.file_name) else False
