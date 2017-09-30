@@ -1,5 +1,4 @@
 import React from 'react';
-import {FaFolderO, FaFolder} from 'react-icons/lib/fa';
 
 export default class extends React.Component {
     constructor(props) {

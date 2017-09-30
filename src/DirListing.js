@@ -20,6 +20,8 @@ export default class extends React.Component {
                     return a.filename.toLowerCase().localeCompare(b.filename.toLowerCase());
                 })
             })
+        }).catch((err) => {
+            this.setState({error: err.response.statusText});
         });
     }
 
@@ -43,7 +45,8 @@ export default class extends React.Component {
     }
 
     renderListing() {
-        if (this.state.dirListing === null) return <div><img src={loading} alt="loading"/></div>
+        if (this.state.error) return <div>{this.state.error} - This should not have happened</div>;
+        if (this.state.dirListing === null) return <div><img src={loading} alt="loading"/></div>;
 
         return <ul>
             {this.renderDirectoryUp()}
