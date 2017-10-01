@@ -64,7 +64,7 @@ class WebdrasilDownloader(object):
         queue = self.queue_factory.from_handle(fp)
         queue.append(QueueEntry(
             file_name,
-            None,
+            0,
             (datetime.date.today() + datetime.timedelta(6 * 365 / 12)).isoformat())
         )
         self.queue_factory.to_handle(queue, fp)
