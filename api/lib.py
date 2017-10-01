@@ -60,7 +60,7 @@ class WebdrasilDownloader(object):
 
     def schedule(self, file_name):
         fp = open(self.queue_file, 'r+')
-        fcntl.flock(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        self._exclusive_lock(fp)
         queue = self.queue_factory.from_handle(fp)
         queue.append(QueueEntry(
             file_name,
@@ -68,26 +68,26 @@ class WebdrasilDownloader(object):
             (datetime.date.today() + datetime.timedelta(6 * 365 / 12)).isoformat())
         )
         self.queue_factory.to_handle(queue, fp)
-        fcntl.flock(fp, fcntl.LOCK_UN)
+        self._release_lock(fp)
         fp.close()
 
     def remove(self, file_name):
         fp = open(self.queue_file, 'r+')
-        fcntl.flock(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        self._exclusive_lock(fp)
         queue = [
             entry
             for entry in self.queue_factory.from_handle(fp)
             if entry.file_name != file_name
         ]
         self.queue_factory.to_handle(queue, fp)
-        fcntl.flock(fp, fcntl.LOCK_UN)
+        self._release_lock(fp)
         fp.close()
 
     def get_queue(self):
         fp = open(self.queue_file, 'r')
-        fcntl.flock(fp, fcntl.LOCK_SH)
+        self._shared_lock(fp)
         queue = self.queue_factory.from_handle(fp)
-        fcntl.flock(fp, fcntl.LOCK_UN)
+        self._release_lock(fp)
         fp.close()
 
         return queue
@@ -100,14 +100,23 @@ class WebdrasilDownloader(object):
 
     def update_progress(self, file_name, new_progress):
         fp = open(self.queue_file, 'r+')
-        fcntl.flock(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        self._exclusive_lock(fp)
         queue = self.queue_factory.from_handle(fp)
         for entry in queue:
             if entry.file_name == file_name:
                 entry.progress = new_progress
         self.queue_factory.to_handle(queue, fp)
-        fcntl.flock(fp, fcntl.LOCK_UN)
+        self._release_lock(fp)
         fp.close()
+
+    def _shared_lock(self, fp):
+        fcntl.flock(fp, fcntl.LOCK_SH)
+
+    def _exclusive_lock(self, fp):
+        fcntl.flock(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+    def _release_lock(self, fp):
+        fcntl.flock(fp, fcntl.LOCK_UN)
 
 
 from datetime import timedelta
