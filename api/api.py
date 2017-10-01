@@ -5,8 +5,8 @@ from flask import Flask, request, jsonify
 from lib import WebdrasilDownloader
 
 app = Flask(__name__)
-app.config['YGGDRASIL_DIR'] = [u'home', u'annex', u'Yggdrasil']
-app.config['QUEUE_FILE'] = '/home/webdrasil/queue.json'
+app.config['YGGDRASIL_DIR'] = [u'home', u'annex', u'Yggdrasil']  # TODO move to env
+app.config['QUEUE_FILE'] = '/home/webdrasil/queue.json'  # TODO move to env
 
 
 def base_dir_len():

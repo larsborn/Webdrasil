@@ -26,7 +26,7 @@ class Annex(object):
         return out
 
     def get(self, file_name):
-        self._run('get', file_name)
+        return self._run('get', file_name)
 
     def drop(self, file_name):
-        self._run('drop', file_name)
+        return self._run('drop', file_name)
