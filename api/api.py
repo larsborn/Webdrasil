@@ -2,7 +2,7 @@ from os import listdir
 from os.path import isdir, join, sep as path_sep, exists, islink
 
 from flask import Flask, request, jsonify
-from lib import WebdrasilDownloader
+from lib import WebdrasilDownloader, crossdomain
 
 app = Flask(__name__)
 app.config['YGGDRASIL_DIR'] = [u'home', u'annex', u'Yggdrasil']  # TODO move to env
@@ -50,6 +50,7 @@ def _sanitize_basedir(arg):
 
 
 @app.route("/api/download", methods=['POST'])
+@crossdomain(origin='http://localhost:3000')
 def download():
     file_to_download = request.args.get('file', '')
     i = file_to_download.rfind('/')
@@ -70,6 +71,7 @@ def download():
 
 
 @app.route("/api/list", methods=['GET'])
+@crossdomain(origin='http://localhost:3000')
 def list_dir():
     downloader = WebdrasilDownloader(app.config['QUEUE_FILE'])
 
