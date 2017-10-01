@@ -48,6 +48,7 @@ export default class extends React.Component {
             {this.renderDirectoryUp()}
             {this.state.dirListing.map((row) => {
                 return <DirRow
+                    path={this.state.path}
                     key={row.filename}
                     filename={row.filename}
                     isDir={row.is_dir}
