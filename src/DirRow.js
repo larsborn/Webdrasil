@@ -11,7 +11,7 @@ export default class extends React.Component {
         this.filename = props.filename;
         this.isDir = props.isDir;
         this.isEmpty = props.isEmpty;
-        this.fileStatus = props.fileStatus;
+        this.state = {fileStatus: props.fileStatus}
     }
 
     render() {
@@ -24,10 +24,10 @@ export default class extends React.Component {
                 }} href="#">{content}</a>;
             }
         }
-        else if (this.fileStatus === 'IN_PROGRESS') {
+        else if (this.state.fileStatus === 'IN_PROGRESS') {
             content = <div>{content} <i>processing...</i></div>;
         }
-        else if (this.fileStatus === 'MISSING') {
+        else if (this.state.fileStatus === 'MISSING') {
             content = <div>{content} <a onClick={(event) => {
                 this.setState({fileStatus: 'IN_PROGRESS'});
                 new WebdrasilApi().download(path.join(this.path, this.filename)).catch((err) => {
@@ -35,7 +35,7 @@ export default class extends React.Component {
                     this.setState({fileStatus: 'MISSING'});
                 });
                 event.preventDefault();
-            }} href="#">download</a></div>;
+            }} href="#">schedule download</a></div>;
         }
 
         return <li key={this.filename}>{content}</li>;
