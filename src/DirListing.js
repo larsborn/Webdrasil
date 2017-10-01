@@ -25,10 +25,6 @@ export default class extends React.Component {
         });
     }
 
-    clickDownload(filename) {
-        new WebdrasilApi().download(path.join(this.state.path, filename));
-    }
-
     componentWillMount() {
         this.loadDirectoryContent('');
     }
@@ -58,7 +54,6 @@ export default class extends React.Component {
                     isEmpty={row.is_empty}
                     fileStatus={row.file_status}
                     clickDirectory={this.loadDirectoryContent.bind(this)}
-                    clickDownload={this.clickDownload.bind(this)}
                 />
             })}
         </ul>

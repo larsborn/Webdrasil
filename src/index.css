@@ -3,3 +3,16 @@ body {
     padding: 0;
     font-family: sans-serif;
 }
+
+.toast {
+    background: #a9041e;
+    color: #fff;
+}
+
+.toast > .toastify__close {
+    color: #fff;
+}
+
+.transparent-progress {
+    background: rgba(255, 255, 255, .7);
+}
