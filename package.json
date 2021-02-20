@@ -5,12 +5,13 @@
     "react-scripts": "0.2.1"
   },
   "dependencies": {
-    "axios": "^0.13.1",
-    "history": "^3.0.0",
-    "react": "^15.2.1",
-    "react-dom": "^15.2.1",
-    "react-icons": "^2.2.1",
-    "react-toastify": "^2.1.0"
+    "axios": "^0.21.1",
+    "glamor": "^2.20.40",
+    "history": "^3.3.0",
+    "react": "^15.7.0",
+    "react-dom": "^15.7.0",
+    "react-icons": "^2.2.7",
+    "react-toastify": "^2.2.2"
   },
   "scripts": {
     "start": "react-scripts start",

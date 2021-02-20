@@ -1,5 +1,4 @@
 import React from 'react';
-import path from 'path';
 import loading from './image/ajax-loader.gif'
 import WebdrasilApi from './WebdrasilApi';
 import DirRow from './DirRow';
@@ -10,8 +9,17 @@ export default class extends React.Component {
         this.state = {dirListing: null, path: ''}
     }
 
+    dirname(s) {
+        const i = s.lastIndexOf('/');
+        return i === -1 ? '' : s.substr(0, i);
+    }
+
+    join(a, b) {
+        return `${a}/${b}`
+    }
+
     loadDirectoryContent(filename) {
-        let nextPath = filename === '..' ? path.dirname(this.state.path) : path.join(this.state.path, filename);
+        let nextPath = filename === '..' ? this.dirname(this.state.path) : this.join(this.state.path, filename);
         if (nextPath === '.') nextPath = '/';
         this.setState({dirListing: null, path: nextPath});
         new WebdrasilApi().list(nextPath).then((response) => {
