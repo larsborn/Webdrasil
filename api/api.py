@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 from os import listdir
 from os.path import isdir, join, sep as path_sep, exists, islink
 
@@ -78,7 +80,8 @@ def list_dir():
     base_folder = _sanitize_basedir(request.args.get('dir', ''))
     ret = []
     for filename in listdir(base_folder):
-        if filename.startswith('.'): continue
+        if filename.startswith('.'):
+            continue
         full_filename = join(base_folder, filename)
 
         # determine file status

@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import datetime
 import json
 import os
-import fcntl
 from dateutil import parser
 
 
@@ -109,13 +110,19 @@ class WebdrasilDownloader(object):
         self._release_lock(fp)
         fp.close()
 
-    def _shared_lock(self, fp):
+    @staticmethod
+    def _shared_lock(fp):
+        import fcntl
         fcntl.flock(fp, fcntl.LOCK_SH)
 
-    def _exclusive_lock(self, fp):
+    @staticmethod
+    def _exclusive_lock(fp):
+        import fcntl
         fcntl.flock(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
-    def _release_lock(self, fp):
+    @staticmethod
+    def _release_lock(fp):
+        import fcntl
         fcntl.flock(fp, fcntl.LOCK_UN)
 
 
@@ -129,9 +136,9 @@ def crossdomain(origin=None, methods=None, headers=None,
                 automatic_options=True):
     if methods is not None:
         methods = ', '.join(sorted(x.upper() for x in methods))
-    if headers is not None and not isinstance(headers, basestring):
+    if headers is not None and not isinstance(headers, str):
         headers = ', '.join(x.upper() for x in headers)
-    if not isinstance(origin, basestring):
+    if not isinstance(origin, str):
         origin = ', '.join(origin)
     if isinstance(max_age, timedelta):
         max_age = max_age.total_seconds()
