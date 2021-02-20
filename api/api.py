@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-from os import listdir
+import os
 from os.path import isdir, join, sep as path_sep, exists, islink
 
 from flask import Flask, request, jsonify
 from lib import WebdrasilDownloader, crossdomain
 
 app = Flask(__name__)
-app.config['YGGDRASIL_DIR'] = [u'home', u'annex', u'Yggdrasil']  # TODO move to env
-app.config['QUEUE_FILE'] = '/home/webdrasil/queue.json'  # TODO move to env
+app.config['YGGDRASIL_DIR'] = os.environ.get('DIR', None)
+if app.config['YGGDRASIL_DIR'] is None:
+    app.config['YGGDRASIL_DIR'] = [u'home', u'annex', u'Yggdrasil']
+else:
+    app.config['YGGDRASIL_DIR'] = app.config['YGGDRASIL_DIR'].split('/')
+app.config['QUEUE_FILE'] = os.environ.get('QUEUE_FILE_NAME', '/home/webdrasil/queue.json')
 
 
 def base_dir_len():
@@ -43,7 +47,7 @@ def _sanitize_basedir(arg):
     for part in arg.split(path_sep):
         if not part:
             continue
-        if part not in listdir(path_sep + join(*current_folder)):
+        if part not in os.listdir(path_sep + join(*current_folder)):
             raise InvalidUsage('Folder does not exist', 404)
         current_folder.append(part)
         if not isdir(path_sep + join(*current_folder)):
@@ -79,7 +83,7 @@ def list_dir():
 
     base_folder = _sanitize_basedir(request.args.get('dir', ''))
     ret = []
-    for filename in listdir(base_folder):
+    for filename in os.listdir(base_folder):
         if filename.startswith('.'):
             continue
         full_filename = join(base_folder, filename)
@@ -95,7 +99,7 @@ def list_dir():
         ret.append({
             'filename': filename,
             'is_dir': isdir(full_filename),
-            'is_empty': isdir(full_filename) and len(listdir(full_filename)) == 0,
+            'is_empty': isdir(full_filename) and len(os.listdir(full_filename)) == 0,
             'is_symlink': islink(full_filename),
             'file_status': file_status,
         })
