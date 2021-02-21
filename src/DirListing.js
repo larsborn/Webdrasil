@@ -22,6 +22,7 @@ export default class extends React.Component {
         let nextPath = filename === '..' ? this.dirname(this.state.path) : this.join(this.state.path, filename);
         if (nextPath === '.') nextPath = '/';
         this.setState({dirListing: null, path: nextPath});
+        document.location.hash = nextPath;
         new WebdrasilApi().list(nextPath).then((response) => {
             this.setState({
                 dirListing: response.data.sort((a, b) => {
@@ -34,7 +35,7 @@ export default class extends React.Component {
     }
 
     componentWillMount() {
-        this.loadDirectoryContent('');
+        this.loadDirectoryContent(document.location.hash.substr(1));
     }
 
     componentDidMount() {
