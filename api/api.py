@@ -1,22 +1,30 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-from os.path import isdir, join, sep as path_sep, exists, islink
+import sys
+import re
+
+sys.path.append(os.path.join(os.path.dirname(__file__)))
 
 from flask import Flask, request, jsonify
 from lib import WebdrasilDownloader, crossdomain
 
 app = Flask(__name__)
-app.config['YGGDRASIL_DIR'] = os.environ.get('DIR', None)
-if app.config['YGGDRASIL_DIR'] is None:
-    app.config['YGGDRASIL_DIR'] = [u'home', u'annex', u'Yggdrasil']
-else:
-    app.config['YGGDRASIL_DIR'] = app.config['YGGDRASIL_DIR'].split('/')
-app.config['QUEUE_FILE'] = os.environ.get('QUEUE_FILE_NAME', '/home/webdrasil/queue.json')
-
-
-def base_dir_len():
-    return len('/'.join(app.config['YGGDRASIL_DIR'])) + 2
+app.config['BASE_DIR'] = os.environ.get('BASE_DIR', None)
+if app.config['BASE_DIR'] is None:
+    raise Exception('BASE_DIR is mandatory')
+if not os.path.exists(app.config["BASE_DIR"]):
+    raise Exception(F'"{app.config["BASE_DIR"]}" does not exist')
+if not os.path.isdir(app.config["BASE_DIR"]):
+    raise Exception(F'"{app.config["BASE_DIR"]}" is not a directory')
+app.config['QUEUE_FILE'] = os.environ.get('QUEUE_FILE_NAME', None)
+if app.config['QUEUE_FILE'] is None:
+    raise Exception('QUEUE_FILE is mandatory')
+queue_dir = os.path.dirname(app.config['QUEUE_FILE'])
+if not os.path.exists(queue_dir):
+    raise Exception(F'"{queue_dir}" does not exist')
+if not os.path.isdir(queue_dir):
+    raise Exception(F'"{queue_dir}" is not a directory')
 
 
 class InvalidUsage(Exception):
@@ -42,17 +50,17 @@ def handle_invalid_usage(error):
     return response
 
 
-def _sanitize_basedir(arg):
-    current_folder = app.config['YGGDRASIL_DIR'][:]
-    for part in arg.split(path_sep):
+def sanitize_basedir(arg):
+    current_parts = ['']
+    for part in arg.split('/'):
         if not part:
             continue
-        if part not in os.listdir(path_sep + join(*current_folder)):
+        if part not in os.listdir(os.path.join(app.config['BASE_DIR'], *current_parts)):
+            raise InvalidUsage('Path does not exist', 404)
+        current_parts.append(part)
+        if os.path.isdir(os.path.join(app.config['BASE_DIR'], *current_parts, part)):
             raise InvalidUsage('Folder does not exist', 404)
-        current_folder.append(part)
-        if not isdir(path_sep + join(*current_folder)):
-            raise InvalidUsage('Folder does not exist', 404)
-    return path_sep + join(*current_folder)
+    return os.path.join(*current_parts)
 
 
 @app.route("/api/download", methods=['POST'])
@@ -62,16 +70,19 @@ def download():
     i = file_to_download.rfind('/')
     if i == -1:
         raise InvalidUsage('Cannot split path', 400)
-    base_dir = _sanitize_basedir(file_to_download[:i])
-    if not base_dir:
+    local_dir = sanitize_basedir(file_to_download[:i])
+    if not local_dir:
         raise InvalidUsage('Unknown error', 400)
-    file_to_download = join(base_dir, file_to_download[i + 1:])
+    file_to_download = os.path.join(local_dir, file_to_download[i + 1:])
 
-    if not islink(file_to_download):
+    full_path = os.path.join(app.config['BASE_DIR'], file_to_download)
+    if not os.path.exists(full_path):
         raise InvalidUsage('File does not exist', 404)
+    if not os.path.islink(full_path):
+        raise InvalidUsage('File is not a link', 404)
 
     downloader = WebdrasilDownloader(app.config['QUEUE_FILE'])
-    downloader.schedule(file_to_download[base_dir_len():])
+    downloader.schedule(full_path)
 
     return jsonify({})
 
@@ -79,32 +90,33 @@ def download():
 @app.route("/api/list", methods=['GET'])
 @crossdomain(origin='http://localhost:3000')
 def list_dir():
-    downloader = WebdrasilDownloader(app.config['QUEUE_FILE'])
-
-    base_folder = _sanitize_basedir(request.args.get('dir', ''))
+    local_dir = sanitize_basedir(request.args.get('dir', ''))
+    base_dir = app.config['BASE_DIR']
     ret = []
-    for filename in os.listdir(base_folder):
-        if filename.startswith('.'):
+    current_dir = os.path.join(base_dir, local_dir)
+    for file_name in os.listdir(current_dir):
+        if file_name.startswith('.'):
             continue
-        full_filename = join(base_folder, filename)
+        local_path = os.path.join(local_dir, file_name)
+        full_path = os.path.join(base_dir, current_dir, file_name)
 
         # determine file status
         file_status = None
-        if islink(full_filename):
-            if exists(full_filename):
+        if os.path.islink(full_path):
+            if os.path.exists(full_path):
                 file_status = 'EXISTS'
             else:
-                file_status = 'IN_PROGRESS' if downloader.is_scheduled(full_filename[base_dir_len():]) else 'MISSING'
+                downloader = WebdrasilDownloader(app.config['QUEUE_FILE'])
+                file_status = 'IN_PROGRESS' if downloader.is_scheduled(local_path) else 'MISSING'
 
         ret.append({
-            'filename': filename,
-            'is_dir': isdir(full_filename),
-            'is_empty': isdir(full_filename) and len(os.listdir(full_filename)) == 0,
-            'is_symlink': islink(full_filename),
+            'filename': file_name,
+            'is_dir': os.path.isdir(full_path),
+            'is_empty': os.path.isdir(full_path) and len(os.listdir(full_path)) == 0,
+            'is_symlink': os.path.islink(full_path),
             'file_status': file_status,
         })
-    resp = jsonify(ret)
-    return resp
+    return jsonify(ret)
 
 
 if __name__ == "__main__":
