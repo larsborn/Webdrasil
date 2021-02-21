@@ -82,7 +82,6 @@ export default class extends React.Component {
         let untilNow = [];
         let spl = path.split('/');
         spl.forEach((part, i) => {
-            // if (this.isLastElement(i, spl)) return part;
             untilNow.push(part)
             const path = untilNow.join('/');
             ret.push(<span key={untilNow.join('/')}>
