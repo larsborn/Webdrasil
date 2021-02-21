@@ -2,6 +2,7 @@ import React from 'react';
 import loading from './image/ajax-loader.gif'
 import WebdrasilApi from './WebdrasilApi';
 import DirRow from './DirRow';
+import Link from "./Link";
 
 export default class extends React.Component {
     constructor(props) {
@@ -18,9 +19,7 @@ export default class extends React.Component {
         return a ? `${a}/${b}` : b;
     }
 
-    loadDirectoryContent(filename) {
-        let nextPath = filename === '..' ? this.dirname(this.state.path) : this.join(this.state.path, filename);
-        if (nextPath === '.') nextPath = '/';
+    loadPathContent(nextPath) {
         this.setState({dirListing: null, path: nextPath});
         document.location.hash = nextPath;
         new WebdrasilApi().list(nextPath).then((response) => {
@@ -34,6 +33,12 @@ export default class extends React.Component {
         });
     }
 
+    loadDirectoryContent(filename) {
+        let nextPath = filename === '..' ? this.dirname(this.state.path) : this.join(this.state.path, filename);
+        if (nextPath === '.') nextPath = '/';
+        this.loadPathContent(nextPath);
+    }
+
     componentWillMount() {
         this.loadDirectoryContent(document.location.hash.substr(1));
     }
@@ -43,10 +48,9 @@ export default class extends React.Component {
 
     renderDirectoryUp() {
         if (this.state.path === '') return '';
-        return <li><a href="#" onClick={(event) => {
+        return <li><Link onClick={() => {
             this.loadDirectoryContent('..');
-            event.preventDefault();
-        }}>..</a></li>
+        }}>..</Link></li>
     }
 
     renderListing() {
@@ -69,9 +73,24 @@ export default class extends React.Component {
         </ul>
     }
 
+    renderPath(path) {
+        let ret = [];
+        let untilNow = [];
+        path.split('/').forEach(part => {
+            untilNow.push(part)
+            const path = untilNow.join('/');
+            ret.push(<span key={untilNow.join('/')}>
+                /<Link onClick={() => {
+                this.loadPathContent(path);
+            }} href="#">{part}</Link>
+            </span>);
+        })
+        return ret;
+    }
+
     render() {
         return <div>
-            <p>Current Directory: /{this.state.path}</p>
+            <div>Current Directory: {this.renderPath(this.state.path)}</div>
             {this.renderListing()}
         </div>;
     }
