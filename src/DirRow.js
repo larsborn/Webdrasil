@@ -3,6 +3,7 @@ import WebdrasilApi from './WebdrasilApi';
 import {toast} from 'react-toastify';
 import Link from "./Link";
 import DirLink from "./DirLink";
+import PathUtils from "./PathUtils";
 
 export default class extends React.Component {
     constructor(props) {
@@ -13,14 +14,12 @@ export default class extends React.Component {
         this.isDir = props.isDir;
         this.isEmpty = props.isEmpty;
         this.state = {fileStatus: props.fileStatus}
-    }
 
-    join(a, b) {
-        return `${a}/${b}`
+        this.pathUtils = new PathUtils();
     }
 
     render() {
-        const full_file_path = this.join(this.path, this.filename);
+        const full_file_path = this.pathUtils.join(this.path, this.filename);
         let content = this.filename;
         if (this.isDir) {
             if (! this.isEmpty) {

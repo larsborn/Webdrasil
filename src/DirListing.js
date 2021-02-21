@@ -3,20 +3,18 @@ import loading from './image/ajax-loader.gif'
 import WebdrasilApi from './WebdrasilApi';
 import DirRow from './DirRow';
 import DirLink from "./DirLink";
+import PathUtils from "./PathUtils";
 
 export default class extends React.Component {
     constructor(props) {
         super(props);
         this.state = {dirListing: null, path: ''}
+        this.pathUtils = new PathUtils();
     }
 
     dirname(s) {
         const i = s.lastIndexOf('/');
         return i === -1 ? '' : s.substr(0, i);
-    }
-
-    join(a, b) {
-        return a ? `${a}/${b}` : b;
     }
 
     loadPathContent(nextPath) {
@@ -62,7 +60,7 @@ export default class extends React.Component {
                     isEmpty={row.is_empty}
                     fileStatus={row.file_status}
                     clickDirectory={() => {
-                        this.loadPathContent(this.join(this.state.path, row.filename))
+                        this.loadPathContent(this.pathUtils.join(this.state.path, row.filename))
                     }}
                 />
             })}
@@ -75,15 +73,17 @@ export default class extends React.Component {
 
     renderPath(path) {
         let ret = [
-            <span key="">{path === '' ? 'home' : <DirLink caption="home" dir="" loadFunc={this.loadPathContent.bind(this)}/>}</span>
+            <span key="breadcrumb-">{path === '' ? 'home' :
+                <DirLink caption="home" dir="" loadFunc={this.loadPathContent.bind(this)}/>}</span>
         ];
         let untilNow = [];
         if (! path) return ret;
         let spl = path.split('/');
         spl.forEach((part, i) => {
+            if (! part) return;
             untilNow.push(part)
             const path = untilNow.join('/');
-            ret.push(<span key={untilNow.join('/')}>
+            ret.push(<span key={`breadcrumb-${path}`}>
                 /{
                 this.isLastElement(i, spl) ? <span>{part}</span>
                     : <DirLink caption={part} dir={path} loadFunc={this.loadPathContent.bind(this)}/>}
