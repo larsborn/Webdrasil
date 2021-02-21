@@ -73,16 +73,22 @@ export default class extends React.Component {
         </ul>
     }
 
+    isLastElement(i, arr) {
+        return i + 1 === arr.length;
+    }
+
     renderPath(path) {
         let ret = [];
         let untilNow = [];
-        path.split('/').forEach(part => {
+        let spl = path.split('/');
+        spl.forEach((part, i) => {
+            // if (this.isLastElement(i, spl)) return part;
             untilNow.push(part)
             const path = untilNow.join('/');
             ret.push(<span key={untilNow.join('/')}>
-                /<Link onClick={() => {
+                /{this.isLastElement(i, spl) ? <span>{part}</span> : <Link onClick={() => {
                 this.loadPathContent(path);
-            }} href="#">{part}</Link>
+            }}>{part}</Link>}
             </span>);
         })
         return ret;
