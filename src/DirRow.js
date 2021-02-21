@@ -1,5 +1,4 @@
 import React from 'react';
-import path from 'path';
 import WebdrasilApi from './WebdrasilApi';
 import {toast} from 'react-toastify';
 
@@ -12,6 +11,10 @@ export default class extends React.Component {
         this.isDir = props.isDir;
         this.isEmpty = props.isEmpty;
         this.state = {fileStatus: props.fileStatus}
+    }
+
+    join(a, b) {
+        return `${a}/${b}`
     }
 
     render() {
@@ -30,7 +33,7 @@ export default class extends React.Component {
         else if (this.state.fileStatus === 'MISSING') {
             content = <div>{content} <a onClick={(event) => {
                 this.setState({fileStatus: 'IN_PROGRESS'});
-                new WebdrasilApi().download(path.join(this.path, this.filename)).catch((err) => {
+                new WebdrasilApi().download(this.join(this.path, this.filename)).catch((err) => {
                     toast('Cannot schedule file for download.');
                     this.setState({fileStatus: 'MISSING'});
                 });

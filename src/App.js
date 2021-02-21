@@ -7,16 +7,14 @@ import 'react-toastify/dist/ReactToastify.min.css';
 
 class App extends Component {
     render() {
-        return (
-            <div className="App">
-                <ToastContainer toastClassName="toast" progressClassName="transparent-progress"/>
-                <div className="App-header">
-                    <img src={logo} className="App-logo" alt="logo"/>
-                    <h2>Webdrasil</h2>
-                </div>
-                <DirListing/>
+        return <div className="App">
+            <ToastContainer toastClassName="toast" progressClassName="transparent-progress"/>
+            <div className="App-header">
+                <img src={logo} className="App-logo" alt="logo"/>
+                <h2>Webdrasil</h2>
             </div>
-        );
+            <DirListing/>
+        </div>;
     }
 }
 

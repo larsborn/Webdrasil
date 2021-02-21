@@ -15,7 +15,7 @@ export default class extends React.Component {
     }
 
     join(a, b) {
-        return `${a}/${b}`
+        return a ? `${a}/${b}` : b;
     }
 
     loadDirectoryContent(filename) {
@@ -41,7 +41,7 @@ export default class extends React.Component {
     }
 
     renderDirectoryUp() {
-        if (this.state.path === '/') return '';
+        if (this.state.path === '') return '';
         return <li><a href="#" onClick={(event) => {
             this.loadDirectoryContent('..');
             event.preventDefault();
@@ -70,7 +70,7 @@ export default class extends React.Component {
 
     render() {
         return <div>
-            <p>Current Directory: {this.state.path ? this.state.path : '/'}</p>
+            <p>Current Directory: /{this.state.path}</p>
             {this.renderListing()}
         </div>;
     }
