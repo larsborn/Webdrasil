@@ -78,7 +78,11 @@ export default class extends React.Component {
     }
 
     renderPath(path) {
-        let ret = [];
+        let ret = [
+            <span key="">{path === '' ? 'home' : <Link onClick={() => {
+                this.loadPathContent('');
+            }}>home</Link>}</span>
+        ];
         let untilNow = [];
         let spl = path.split('/');
         spl.forEach((part, i) => {
