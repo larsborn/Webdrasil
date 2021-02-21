@@ -85,6 +85,7 @@ export default class extends React.Component {
             }}>home</Link>}</span>
         ];
         let untilNow = [];
+        if (! path) return ret;
         let spl = path.split('/');
         spl.forEach((part, i) => {
             untilNow.push(part)
