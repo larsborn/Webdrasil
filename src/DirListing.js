@@ -2,7 +2,6 @@ import React from 'react';
 import loading from './image/ajax-loader.gif'
 import WebdrasilApi from './WebdrasilApi';
 import DirRow from './DirRow';
-import Link from "./Link";
 import DirLink from "./DirLink";
 
 export default class extends React.Component {
@@ -76,9 +75,7 @@ export default class extends React.Component {
 
     renderPath(path) {
         let ret = [
-            <span key="">{path === '' ? 'home' : <Link onClick={() => {
-                this.loadPathContent('');
-            }}>home</Link>}</span>
+            <span key="">{path === '' ? 'home' : <DirLink caption="home" dir="" loadFunc={this.loadPathContent.bind(this)}/>}</span>
         ];
         let untilNow = [];
         if (! path) return ret;
