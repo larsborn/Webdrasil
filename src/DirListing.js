@@ -34,14 +34,8 @@ export default class extends React.Component {
         });
     }
 
-    loadDirectoryContent(filename) {
-        let nextPath = filename === '..' ? this.dirname(this.state.path) : this.join(this.state.path, filename);
-        if (nextPath === '.') nextPath = '/';
-        this.loadPathContent(nextPath);
-    }
-
     componentWillMount() {
-        this.loadDirectoryContent(decodeURIComponent(document.location.hash.substr(1)));
+        this.loadPathContent(decodeURIComponent(document.location.hash.substr(1)));
     }
 
     componentDidMount() {
@@ -49,9 +43,9 @@ export default class extends React.Component {
 
     renderDirectoryUp() {
         if (this.state.path === '') return '';
-        return <li><Link onClick={() => {
-            this.loadDirectoryContent('..');
-        }}>..</Link></li>
+        return <li><DirLink
+            caption=".." dir={this.dirname(this.state.path)}
+            loadFunc={this.loadPathContent.bind(this)}/></li>
     }
 
     renderListing() {
@@ -68,7 +62,9 @@ export default class extends React.Component {
                     isDir={row.is_dir}
                     isEmpty={row.is_empty}
                     fileStatus={row.file_status}
-                    clickDirectory={this.loadDirectoryContent.bind(this)}
+                    clickDirectory={() => {
+                        this.loadPathContent(this.join(this.state.path, row.filename))
+                    }}
                 />
             })}
         </ul>
