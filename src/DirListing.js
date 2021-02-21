@@ -3,6 +3,7 @@ import loading from './image/ajax-loader.gif'
 import WebdrasilApi from './WebdrasilApi';
 import DirRow from './DirRow';
 import Link from "./Link";
+import DirLink from "./DirLink";
 
 export default class extends React.Component {
     constructor(props) {
@@ -40,7 +41,7 @@ export default class extends React.Component {
     }
 
     componentWillMount() {
-        this.loadDirectoryContent(document.location.hash.substr(1));
+        this.loadDirectoryContent(decodeURIComponent(document.location.hash.substr(1)));
     }
 
     componentDidMount() {
@@ -89,11 +90,11 @@ export default class extends React.Component {
             untilNow.push(part)
             const path = untilNow.join('/');
             ret.push(<span key={untilNow.join('/')}>
-                /{this.isLastElement(i, spl) ? <span>{part}</span> : <Link onClick={() => {
-                this.loadPathContent(path);
-            }}>{part}</Link>}
+                /{
+                this.isLastElement(i, spl) ? <span>{part}</span>
+                    : <DirLink caption={part} dir={path} loadFunc={this.loadPathContent.bind(this)}/>}
             </span>);
-        })
+        });
         return ret;
     }
 

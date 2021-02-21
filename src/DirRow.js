@@ -2,6 +2,7 @@ import React from 'react';
 import WebdrasilApi from './WebdrasilApi';
 import {toast} from 'react-toastify';
 import Link from "./Link";
+import DirLink from "./DirLink";
 
 export default class extends React.Component {
     constructor(props) {
@@ -19,21 +20,20 @@ export default class extends React.Component {
     }
 
     render() {
+        const full_file_path = this.join(this.path, this.filename);
         let content = this.filename;
         if (this.isDir) {
-            if (!this.isEmpty) {
-                content = <Link onClick={() => {
+            if (! this.isEmpty) {
+                content = <DirLink dir={full_file_path} caption={this.filename} loadFunc={() => {
                     this.clickDirectory(this.filename);
-                }}>{content}</Link>;
+                }}/>;
             }
-        }
-        else if (this.state.fileStatus === 'IN_PROGRESS') {
+        } else if (this.state.fileStatus === 'IN_PROGRESS') {
             content = <div>{content} <i>processing...</i></div>;
-        }
-        else if (this.state.fileStatus === 'MISSING') {
+        } else if (this.state.fileStatus === 'MISSING') {
             content = <div>{content} <Link onClick={() => {
                 this.setState({fileStatus: 'IN_PROGRESS'});
-                new WebdrasilApi().download(this.join(this.path, this.filename)).catch((err) => {
+                new WebdrasilApi().download(full_file_path).catch((err) => {
                     toast('Cannot schedule file for download.');
                     this.setState({fileStatus: 'MISSING'});
                 });
