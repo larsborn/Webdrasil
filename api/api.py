@@ -66,23 +66,23 @@ def sanitize_basedir(arg):
 @app.route("/api/download", methods=['POST'])
 @crossdomain(origin='http://localhost:3000')
 def download():
-    file_to_download = request.args.get('file', '')
-    i = file_to_download.rfind('/')
+    local_dir = sanitize_basedir(request.args.get('dir', ''))
+    local_path = request.args.get('file', '')
+    i = local_path.rfind('/')
     if i == -1:
         raise InvalidUsage('Cannot split path', 400)
-    local_dir = sanitize_basedir(file_to_download[:i])
+    local_dir = sanitize_basedir(local_path[:i])
     if not local_dir:
         raise InvalidUsage('Unknown error', 400)
-    file_to_download = os.path.join(local_dir, file_to_download[i + 1:])
-
-    full_path = os.path.join(app.config['BASE_DIR'], file_to_download)
-    if not os.path.exists(full_path):
-        raise InvalidUsage('File does not exist', 404)
+    local_path = os.path.join(local_dir, local_path[i + 1:])
+    full_path = os.path.join(app.config['BASE_DIR'], local_path)
+    if os.path.exists(full_path):
+        raise InvalidUsage('File exists already', 400)
     if not os.path.islink(full_path):
         raise InvalidUsage('File is not a link', 404)
 
     downloader = WebdrasilDownloader(app.config['QUEUE_FILE'])
-    downloader.schedule(full_path)
+    downloader.schedule(local_path)
 
     return jsonify({})
 
